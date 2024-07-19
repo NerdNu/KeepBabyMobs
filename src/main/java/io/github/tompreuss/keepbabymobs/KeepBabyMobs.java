@@ -25,7 +25,14 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.entity.*;
+import org.bukkit.entity.Ageable;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Horse;
+import org.bukkit.entity.Ocelot;
+import org.bukkit.entity.Tadpole;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Tameable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -125,7 +132,6 @@ public final class KeepBabyMobs extends JavaPlugin implements Listener {
     } // onPlayerInteractEntityEvent
 
     // ------------------------------------------------------------------------
-
     /**
      * If a tadpole tries to grow up, cancel it and revert its age back.
      */

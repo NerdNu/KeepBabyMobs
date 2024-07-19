@@ -25,17 +25,12 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.entity.Ageable;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Horse;
-import org.bukkit.entity.Ocelot;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Tameable;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityTransformEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -122,12 +117,29 @@ public final class KeepBabyMobs extends JavaPlugin implements Listener {
             }
             player.sendMessage(ChatColor.GOLD + "That mob has now been age locked. How adorable!");
             getLogger().info(String.format("%s age locked %s named %s at %s", player.getName(),
-                                                                              ageable.getType().toString(),
-                                                                              ageable.getCustomName(),
-                                                                              locationToString(ageable.getLocation())));
+                    ageable.getType().toString(),
+                    ageable.getCustomName(),
+                    locationToString(ageable.getLocation())));
         }
 
     } // onPlayerInteractEntityEvent
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * If a tadpole tries to grow up, cancel it and revert its age back.
+     */
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void onEntityTransformEvent(EntityTransformEvent event) {
+        Entity entity = event.getEntity();
+        if(entity.getType().equals(EntityType.TADPOLE)) {
+            if(entity.getCustomName() != null) event.setCancelled(true);
+            if(entity instanceof Tadpole) {
+                Tadpole tadpole = (Tadpole) entity;
+                tadpole.setAge(Integer.MIN_VALUE);
+            }
+        }
+    } // onEntityTransformEvent
 
     // ------------------------------------------------------------------------
     /**

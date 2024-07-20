@@ -198,7 +198,11 @@ public final class KeepBabyMobs extends JavaPlugin implements Listener {
     }
 
     // ------------------------------------------------------------------------
-
+    /**
+     * Outputs a confirmation message to the player and console for logging purposes.
+     * @param player The player naming the mob.
+     * @param entity The entity being named.
+     */
     public void logLock(Player player, Entity entity) {
         player.sendMessage(ChatColor.GOLD + "That mob has now been age locked. How adorable!");
         getLogger().info(String.format("%s age locked %s named %s at %s", player.getName(),

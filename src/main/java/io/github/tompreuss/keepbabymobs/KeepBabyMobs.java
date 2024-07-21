@@ -30,12 +30,14 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Ocelot;
+import org.bukkit.entity.Tadpole;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Tameable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityTransformEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -87,12 +89,21 @@ public final class KeepBabyMobs extends JavaPlugin implements Listener {
     public void onPlayerInteractAtEntityEvent(PlayerInteractAtEntityEvent event) {
         Entity entity = event.getRightClicked();
         Player player = event.getPlayer();
+        ItemStack mainHand = player.getEquipment().getItemInMainHand();
+
+        if(entity.getType().equals(EntityType.TADPOLE)) {
+            if(mainHand != null & mainHand.getType().equals(Material.NAME_TAG)) {
+                if(mainHand.getItemMeta().hasDisplayName()) {
+                    logLock(player, entity);
+                }
+            }
+        }
+
         if (player == null || !(entity instanceof Ageable)) {
             return;
         }
 
         // ensure player is holding a name tag
-        ItemStack mainHand = player.getEquipment().getItemInMainHand();
         if (mainHand == null || mainHand.getType() != Material.NAME_TAG) {
             return;
         }
@@ -120,14 +131,26 @@ public final class KeepBabyMobs extends JavaPlugin implements Listener {
             if (!(ageable instanceof Horse)) {
                 ageable.setAge(Integer.MIN_VALUE);
             }
-            player.sendMessage(ChatColor.GOLD + "That mob has now been age locked. How adorable!");
-            getLogger().info(String.format("%s age locked %s named %s at %s", player.getName(),
-                                                                              ageable.getType().toString(),
-                                                                              ageable.getCustomName(),
-                                                                              locationToString(ageable.getLocation())));
+            logLock(player, ageable);
         }
 
     } // onPlayerInteractEntityEvent
+
+    // ------------------------------------------------------------------------
+    /**
+     * If a tadpole tries to grow up, cancel it and revert its age back.
+     */
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void onEntityTransformEvent(EntityTransformEvent event) {
+        Entity entity = event.getEntity();
+        if(entity.getType().equals(EntityType.TADPOLE)) {
+            if(entity.getCustomName() != null) event.setCancelled(true);
+            if(entity instanceof Tadpole) {
+                Tadpole tadpole = (Tadpole) entity;
+                tadpole.setAge(Integer.MIN_VALUE);
+            }
+        }
+    } // onEntityTransformEvent
 
     // ------------------------------------------------------------------------
     /**
@@ -172,6 +195,20 @@ public final class KeepBabyMobs extends JavaPlugin implements Listener {
                                                          location.getY(),
                                                          location.getZ(),
                                                          location.getWorld().getName());
+    }
+
+    // ------------------------------------------------------------------------
+    /**
+     * Outputs a confirmation message to the player and console for logging purposes.
+     * @param player The player naming the mob.
+     * @param entity The entity being named.
+     */
+    public void logLock(Player player, Entity entity) {
+        player.sendMessage(ChatColor.GOLD + "That mob has now been age locked. How adorable!");
+        getLogger().info(String.format("%s age locked %s named %s at %s", player.getName(),
+                entity.getType().toString(),
+                entity.getCustomName(),
+                locationToString(entity.getLocation())));
     }
 
     // ------------------------------------------------------------------------
